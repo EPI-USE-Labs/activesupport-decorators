@@ -11,7 +11,8 @@ Gem::Specification.new do |s|
   s.email       = ["pierre@labs.epiuse.com"]
   s.homepage    = "https://github.com/pierre-pretorius/activesupport-decorators"
   s.summary     = "Adds the decorator pattern to activesupport class loading."
-  s.description = "Adds the decorator pattern to activesupport class loading."
+  s.description = "Useful when extending functionality with Rails engines."
+  s.license     = 'MIT'
 
   s.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
 

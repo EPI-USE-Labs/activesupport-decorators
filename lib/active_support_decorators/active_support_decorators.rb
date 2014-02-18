@@ -1,30 +1,38 @@
 module ActiveSupportDecorators
-  def self.auto_decorate_paths=(path_array)
-    @auto_decorate_paths = path_array
+  def self.dependencies
+    @dependencies ||= {}
   end
 
-  def self.auto_decorate_paths
-    @auto_decorate_paths ||= []
+  def self.add_dependency(path, decorator_path)
+    if dependencies.include?(path)
+      dependencies[path] << decorator_path
+    else
+      dependencies[path] = [decorator_path]
+    end
   end
 
-  def self.auto_decorate_provider_paths=(path_array)
-    @auto_decorate_provider_paths = path_array
+  def self.debug
+    @debug ||= false
   end
 
-  def self.auto_decorate_provider_paths
-    @auto_decorate_provider_paths ||= []
+  def self.debug=(debugging_enabled)
+    @debug = debugging_enabled
   end
 
   def self.load_path_order(file_name)
     file_name_order = [file_name]
 
-    if auto_decorate_paths.any? { |path| file_name.starts_with?(path) }
-      relative_name = file_name.gsub(Rails.root.to_s, '')
+    dependencies.each do |path, decorator_paths|
+      if file_name.starts_with?(path)
+        relative_name = file_name.gsub(path, '')
 
-      auto_decorate_provider_paths.each do |path|
-        decorator_file = "#{path}#{relative_name}"
-        if File.file?(decorator_file) || File.file?(decorator_file + '.rb')
-          file_name_order << decorator_file
+        decorator_paths.each do |decorator_path|
+          decorator_file = "#{decorator_path}#{relative_name}"
+
+          if File.file?(decorator_file) || File.file?(decorator_file + '.rb')
+            Rails.logger.debug "ActiveSupportDecorators: Loading '#{decorator_file}' after '#{file_name}'." if debug
+            file_name_order << decorator_file
+          end
         end
       end
     end
