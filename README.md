@@ -1,4 +1,4 @@
-activesupport-decorators
-========================
+ActiveSupportDecorators
+=======================
 
-Add the decorator pattern to activesupport class loading
+Adds the decorator pattern to activesupport class loading.
