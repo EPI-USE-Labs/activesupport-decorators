@@ -6,7 +6,7 @@ the decorator pattern, you need to load the decorator after the original file ha
 class in a Rails application, ActiveSupport will only load the first file it finds that matches the class name.  This
 means that you will need to manually load the additional (decorator) file.  Usually you don't want to want to introduce
 hard dependencies such as require statements.  You also don't want to preload a bunch of classes in a Rails initializer.
-This gem allows you to specify load dependencies without loading any of them when the application starts up.
+This is a tiny gem provides you with a simple way to specify load dependencies.
 
 Example
 =======
@@ -27,14 +27,14 @@ class Pet
 end
 ```
 
-You can tell ActiveSupportDecorators to load any matching file in my_engine/app/models when a file is loaded from
+Now tell ActiveSupportDecorators to load any matching file in my_engine/app/models when a file is loaded from
 app/models.  A convenient place to do this is in a Rails initializer in the engine:
 
 ```Ruby
 module MyEngine
   module Rails
     class Engine < ::Rails::Engine
-      initializer :append_auto_decorators do |app|
+      initializer :decorator_dependencies do |app|
         ActiveSupportDecorators.add_dependency("#{app.root}/app/models", "#{config.root}/app/models")
       end
     end
@@ -42,4 +42,13 @@ module MyEngine
 end
 ```
 
-Note that you could specify the path as "/app" to decorate controllers, models, helpers, etc.
+Note that you could specify the path as "/app" to allow decorating controllers, models, helpers, etc.
+
+Debugging
+=========
+
+Need to know which decorator files are loaded?  Enable debug output:
+
+```Ruby
+ActiveSupportDecorators.debug = true
+```
