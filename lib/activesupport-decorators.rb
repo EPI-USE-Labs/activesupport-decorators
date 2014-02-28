@@ -1,2 +1,2 @@
-require 'active_support_decorators/dependencies_patch'
 require 'active_support_decorators/active_support_decorators'
+require 'active_support_decorators/dependencies_patch'

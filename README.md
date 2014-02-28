@@ -6,7 +6,7 @@ the decorator pattern, you need to load the decorator after the original file ha
 class in a Rails application, ActiveSupport will only load the first file it finds that matches the class name.  This
 means that you will need to manually load the additional (decorator) file.  Usually you don't want to want to introduce
 hard dependencies such as require statements.  You also don't want to preload a bunch of classes in a Rails initializer.
-This is a tiny gem provides you with a simple way to specify load dependencies.
+This is a tiny gem that provides you with a simple way to specify load dependencies.
 
 Example
 =======
