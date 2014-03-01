@@ -9,7 +9,7 @@ class Graph
     @nodes = []
   end
 
-  def resolve_object_order
+  def list_by_order
     result = []
 
     until @nodes.empty?
@@ -29,14 +29,15 @@ class Graph
     find_or_add_node(object)
   end
 
-  def add_dependency(from_object, to_object)
-    raise 'Objects are identical' if from_object == to_object
+  def add_with_edge(from_object, to_object)
+    fail 'Can not add edge from object to itself' if from_object == to_object
     from_node = find_or_add_node(from_object)
     to_node = find_or_add_node(to_object)
     to_node.depends_on << from_node
-    raise 'EMPTY' if from_node.nil?
+    fail 'EMPTY' if from_node.nil?
   end
 
+  private
   def find_or_add_node(object)
     node = @nodes.find { |n| n.object == object }
     unless node

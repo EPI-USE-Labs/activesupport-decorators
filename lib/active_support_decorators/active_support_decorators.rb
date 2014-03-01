@@ -1,16 +1,18 @@
 require 'active_support_decorators/graph'
 
 module ActiveSupportDecorators
-  def self.dependencies
-    @dependencies ||= {}
+  Dependency = Struct.new(:path, :decorator_path, :file_pattern)
+
+  def self.clear
+    dependencies.clear
   end
 
-  def self.add_dependency(path, decorator_path)
-    if dependencies.include?(path)
-      dependencies[path] << decorator_path
-    else
-      dependencies[path] = [decorator_path]
-    end
+  def self.dependencies
+    @dependencies ||= []
+  end
+
+  def self.add(path, decorator_path, file_pattern = '_decorator')
+    dependencies << Dependency.new(path, decorator_path, file_pattern)
   end
 
   def self.debug
@@ -21,37 +23,37 @@ module ActiveSupportDecorators
     @debug = debugging_enabled
   end
 
+  private
   def self.load_path_order(file_name)
+    # Do not process with .rb extension if provided.
+    sanitized_file_name = file_name.sub(/\.rb$/,'')
+
     graph = Graph.new
-    graph.add(file_name)
+    graph.add(sanitized_file_name)
 
-    # If an attempt is made to load the original file, ensure the decorators are loaded afterwards.
-    dependencies.each do |path, decorator_paths|
-      if file_name.starts_with?(path)
-        relative_name = file_name.gsub(path, '')
+    dependencies.each do |dep|
+      # If an attempt is made to load the original file, ensure the decorators are loaded afterwards.
+      if sanitized_file_name.starts_with?(dep.path)
+        relative_name = sanitized_file_name.sub(dep.path, '')
+        decorator_file = "#{dep.decorator_path}#{relative_name}#{dep.file_pattern}"
 
-        decorator_paths.each do |decorator_path|
-          decorator_file = "#{decorator_path}#{relative_name}"
-
-          if File.file?(decorator_file) || File.file?(decorator_file + '.rb')
-            graph.add_dependency(file_name, decorator_file)
-          end
+        if File.file?(decorator_file + '.rb')
+          graph.add_with_edge(sanitized_file_name, decorator_file)
         end
       end
 
-      # If an attempt is made to load a decorator file, ensure the original file is loaded first.
-      decorator_paths.each do |decorator_path|
-        if file_name.starts_with?(decorator_path)
-          relative_name = file_name.gsub(decorator_path, '')
-          decorated_file = "#{path}#{relative_name}"
+      # If an attempt is made to load a decorator file, ensure the original/decorated file is loaded first.
+      # This is only supported when a decorator was not added with add_global.
+      if dep.path && sanitized_file_name.starts_with?(dep.decorator_path)
+        relative_name = sanitized_file_name.sub(dep.decorator_path, '')
+        decorated_file = "#{dep.path}#{relative_name}".sub(/#{dep.file_pattern}$/, '')
 
-          if File.file?(decorated_file) || File.file?(decorated_file + '.rb')
-            graph.add_dependency(decorated_file, file_name)
-          end
+        if File.file?(decorated_file + '.rb')
+          graph.add_with_edge(decorated_file, sanitized_file_name)
         end
       end
     end
 
-    graph.resolve_object_order
+    graph.list_by_order
   end
 end

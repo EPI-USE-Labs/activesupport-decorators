@@ -1,3 +1,3 @@
 module ActiveSupportDecorators
-  VERSION = '0.9'
+  VERSION = '1.0.1'
 end
