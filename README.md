@@ -65,7 +65,7 @@ module MyEngine
   module Rails
     class Engine < ::Rails::Engine
       initializer :set_decorator_dependencies do |app|
-        ActiveSupportDecorators.add("#{AnotherEngine::Rails::Engine.root}/app", "#{Rails.root}/app")
+        ActiveSupportDecorators.add("#{AnotherEngine::Rails::Engine.root}/app", "#{MyEngine::Rails::Engine.root}/app")
       end
     end
   end
@@ -80,7 +80,7 @@ Need to know which decorator files are loaded?  Enable debug output:
 ActiveSupportDecorators.debug = true
 ```
 
-### Decorator file pattern
+### Custom decorator file pattern
 
 By default decorator files are matched with '_decorator' appended to the file name.  You can remove this suffix
 completely or use your own one.  Note the method signature of add:
