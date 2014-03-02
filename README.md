@@ -1,6 +1,9 @@
 ActiveSupport Decorators
 ========================
 
+[![Build Status](https://travis-ci.org/pierre-pretorius/activesupport-decorators.png?branch=master)]
+(https://travis-ci.org/pierre-pretorius/activesupport-decorators)
+
 The decorator pattern is particularly useful when extending constants in rails engines or vice versa.  To implement
 the decorator pattern, you need to load the decorator after the original file has been loaded.  When you reference a
 class in a Rails application, ActiveSupport will only load the first file it finds that matches the class name.  This
