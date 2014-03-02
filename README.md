@@ -4,9 +4,8 @@ ActiveSupport Decorators
 The decorator pattern is particularly useful when extending constants in rails engines or vice versa.  To implement
 the decorator pattern, you need to load the decorator after the original file has been loaded.  When you reference a
 class in a Rails application, ActiveSupport will only load the first file it finds that matches the class name.  This
-means that you will need to manually load the additional (decorator) file.  Usually you don't want to want to introduce
-hard dependencies such as require statements.  You also don't want to preload a bunch of classes in a Rails initializer.
-This is a tiny gem that provides you with a simple way to specify load file dependencies.
+means that you need to manually load the additional (decorator) file or eager load all of them on application startup.
+This is a tiny gem that provides you with a simple way to tell ActiveSupport to load your decorator files when needed.
 
 ### Installation
 
@@ -26,7 +25,8 @@ end
 ```
 
 Your rails engine adds the concept of pet owners to the application.  You extend the Pet model in the engine with
-the following model decorator (in my_engine/app/models/pet_decorator.rb).
+the following model decorator (in my_engine/app/models/pet_decorator.rb).  Note that you could use 'class Pet' instead
+of 'Pet.class_eval do'.
 
 ```Ruby
 Pet.class_eval do
@@ -88,8 +88,8 @@ Other gems work by simply telling Rails to eager load all your decorators on app
 'MyClass.class_eval do' to extend the original class as this is what triggers the original class to be loaded.
 Disadvantages of this approach include:
 * decorators may not expect other classes to be decorated already, it's a bad idea to depend on load order.
-* development mode is a bit slower since your eager decorator loading usually has a cascade effect on the application.
-  This is more noticable when using JRuby as it will be a compile action instead of class load action.
+* development mode is a bit slower since your decorator eager loading usually has a cascade effect on the application.
+  This is more noticeable when using JRuby as it will be a compile action instead of class load action.
 * using 'MyClass.class_eval do' instead of 'class MyClass' means you can not define constants.
 
 This gem works by hooking into ActiveSupport, which means that decorators are loaded as required instead of at
