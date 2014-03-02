@@ -80,32 +80,18 @@ Need to know which decorator files are loaded?  Enable debug output:
 ActiveSupportDecorators.debug = true
 ```
 
-### Custom decorator file pattern
-
-By default decorator files are matched with '_decorator' appended to the file name.  You can remove this suffix
-completely or use your own one.  Note the method signature of add:
-
-```Ruby
-ActiveSupportDecorators.add(path, decorator_path, file_pattern = '_decorator')
-```
-
-### Decorating decorators
-
-Nested decorators are supported.  Just set them to decorate a path where the dependant decorators are placed.
-
 ### Comparison to other gems
 
-This is yet another decorator gem because it:
-* allows you to specify where and how you name decorators.
-* allows you to limit the paths you decorate.
-* other gems tend to eager load as seen [here]
-  (https://github.com/atd/rails_engine_decorators/blob/master/lib/rails_engine_decorators/engine/configuration.rb)
-  and [here](https://github.com/parndt/decorators/blob/master/lib/decorators/railtie.rb).
-* other gems assume you use 'MyClass.class_eval' to define decorators since it is how you trigger activesupport to load
-  the original file.  This gem allows you to use the normal 'class MyClass' which means you can define constants in
-  decorators.
+Other gems work by simply telling Rails to eager load all your decorators on application startup as seen [here]
+(https://github.com/atd/rails_engine_decorators/blob/master/lib/rails_engine_decorators/engine/configuration.rb) and
+[here](https://github.com/parndt/decorators/blob/master/lib/decorators/railtie.rb).  They expect your decorators to use
+'MyClass.class_eval do' to extend the original class as this is what triggers the original class to be loaded.
+Disadvantages of this approach include:
+* decorators may not expect other classes to be decorated already, it's a bad idea to depend on load order.
+* development mode is a bit slower since your eager decorator loading usually has a cascade effect on the application.
+  This is more noticable when using JRuby as it will be a compile action instead of class load action.
+* using 'MyClass.class_eval do' instead of 'class MyClass' means you can not define constants.
 
-However if you do not want to specify which path's you allow to be decorated, you should use another gem.  Instead of
-single file look ups it will need to search your decorator directories for a matching file, which is not feasible
-especially in a context where any ruby file may be decorated.  The best solution for such a scenario would be to
-eager load the decorators like other gems do.
+This gem works by hooking into ActiveSupport, which means that decorators are loaded as required instead of at
+application startup.  You can use 'class MyClass' and expect that other classes are already decorated, since when you
+reference other classes they will be decorated on the fly when ActiveSupport loads them.

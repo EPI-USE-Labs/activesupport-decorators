@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    activesupport-decorators (1.0)
+    activesupport-decorators (1.0.2)
       rails (~> 3)
 
 GEM
