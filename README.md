@@ -44,7 +44,7 @@ app/.  A convenient place to do this is in a Rails initializer in the engine:
 module MyEngine
   module Rails
     class Engine < ::Rails::Engine
-      initializer :set_decorator_dependencies do |app|
+      initializer :set_decorator_dependencies, :before => :load_environment_hook do |app|
         ActiveSupportDecorators.add("#{app.root}/app", "#{config.root}/app")
       end
     end
@@ -67,7 +67,7 @@ ActiveSupportDecorators.add("#{MyEngine::Rails::Engine.root}/app", "#{Rails.root
 module MyEngine
   module Rails
     class Engine < ::Rails::Engine
-      initializer :set_decorator_dependencies do |app|
+      initializer :set_decorator_dependencies, :before => :load_environment_hook do |app|
         ActiveSupportDecorators.add("#{AnotherEngine::Rails::Engine.root}/app", "#{MyEngine::Rails::Engine.root}/app")
       end
     end
@@ -90,8 +90,9 @@ Other gems work by simply telling Rails to eager load all your decorators on app
 [here](https://github.com/parndt/decorators/blob/master/lib/decorators/railtie.rb).  They expect your decorators to use
 'MyClass.class_eval do' to extend the original class as this is what triggers the original class to be loaded.
 Disadvantages of this approach include:
-* decorators may not expect other classes to be decorated already, it's a bad idea to depend on load order.
-* development mode is a bit slower since your decorator eager loading usually has a cascade effect on the application.
+* if you decorate two classes and one uses decorated functionality of the other, you have to make sure that it is not
+  used during class loading since the other class might not be decorated yet.
+* development mode is a bit slower since eager loading decorators usually has a cascade effect on the application.
   This is more noticeable when using JRuby as it will be a compile action instead of class load action.
 * using 'MyClass.class_eval do' instead of 'class MyClass' means you can not define constants.
 
