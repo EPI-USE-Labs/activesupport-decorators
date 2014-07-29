@@ -15,60 +15,53 @@ This is a tiny gem that provides you with a simple way to tell ActiveSupport to 
 Add it to your Gemfile and run bundle install:
 
 ```Ruby
-gem 'activesupport-decorators', '~> 1.0'
+gem 'activesupport-decorators', '~> 2.0'
 ```
 
-#### Example 1 - Engine extends application class.
+### Usage
 
-Your main rails application defines a model called Pet (in app/models/pet.rb):
+#### Example 1 - Application extends engine (or any other) class.
+
+Your Rails engine defines a model called Pet (in my_engine/app/models/pet.rb):
 
 ```Ruby
 class Pet < ActiveRecord::Base
 end
 ```
 
-Your rails engine adds the concept of pet owners to the application.  You extend the Pet model in the engine with
-the following model decorator (in my_engine/app/models/pet_decorator.rb).  Note that you could use 'class Pet' instead
-of 'Pet.class_eval do'.
+Your Rails application now wants to adds the concept of pet owners.  You extend the Pet model in the main application
+with the following model decorator (in app/models/pet_decorator.rb).  Note that you could use 'Pet.class_eval do'
+instead of 'class Pet' if you want.
 
 ```Ruby
-Pet.class_eval do
+class Pet
   belongs_to :owner
 end
 ```
 
-Now tell ActiveSupportDecorators to load any matching decorator file in my_engine/app when a file is loaded from
-app/.  A convenient place to do this is in a Rails initializer in the engine:
+Set your ActiveSupportDecorators paths similar to setting Rails autoload paths.  This will load a decorator file if it
+matches the original file's name/path and ends with '_decorator.rb'.  In other words when the engine's app/pet.rb is
+loaded, it will load the main applications app/pet_decorator.rb.
+
+```Ruby
+ActiveSupportDecorators.paths << File.join(Rails.application.root, 'app/**')
+```
+
+Note that '**' is added to the end of the path because this is the pattern that Rails autoloads your app folder with.
+It means that every folder inside app is regarded as a autoload path instead of app/ itself, so that you can call your
+model 'Pet' and not 'Models::Pet'.
+
+#### Example 2 - Engine extends application (or any other) class.
+
+Similar to the example above except the initializer is placed in the engine instead of the main application. The example
+below will cause any matching decorator file in my_engine/app to load when a file is loaded from app/.
 
 ```Ruby
 module MyEngine
   module Rails
     class Engine < ::Rails::Engine
-      initializer :set_decorator_dependencies, :before => :load_environment_hook do |app|
-        ActiveSupportDecorators.add("#{app.root}/app", "#{config.root}/app")
-      end
-    end
-  end
-end
-```
-
-#### Example 2 - Application extends engine class.
-
-Similar to the example above except the initializer is placed in the main application instead of the engine.  Create a
-file called config/initializers/set_decorator_dependencies.rb (or any other name) with content:
-
-```Ruby
-ActiveSupportDecorators.add("#{MyEngine::Rails::Engine.root}/app", "#{Rails.root}/app")
-```
-
-#### Example 3 - Engine extends another engine class.
-
-```Ruby
-module MyEngine
-  module Rails
-    class Engine < ::Rails::Engine
-      initializer :set_decorator_dependencies, :before => :load_environment_hook do |app|
-        ActiveSupportDecorators.add("#{AnotherEngine::Rails::Engine.root}/app", "#{MyEngine::Rails::Engine.root}/app")
+      initializer :set_decorator_paths, :before => :load_environment_hook do |app|
+        ActiveSupportDecorators.paths << File.join(config.root, 'app/**')
       end
     end
   end

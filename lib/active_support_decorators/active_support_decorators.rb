@@ -1,17 +1,18 @@
 module ActiveSupportDecorators
-  DECORATOR_PATTERN = '_decorator'
-
-  def self.clear
-    dependencies.clear
+  def self.paths
+    @paths ||= []
   end
 
-  def self.dependencies
-    @dependencies ||= {}
+  def self.pattern
+    @pattern ||= '_decorator'
   end
 
-  def self.add(path, decorator_path)
-    dependencies[path] ||= []
-    dependencies[path] << decorator_path
+  def self.pattern=(pattern)
+    @pattern = pattern
+  end
+
+  def self.expanded_paths
+    paths.map { |p| Dir[p] }.flatten
   end
 
   def self.debug
@@ -23,46 +24,33 @@ module ActiveSupportDecorators
   end
 
   private
-  def self.load_path_order(file_name)
-    # Do not process with .rb extension if provided.
-    sanitized_file_name = file_name.sub(/\.rb$/, '')
-    decorated_file = nil
-    decorators = []
+  def self.all_autoload_paths
+    return [] unless defined?(Rails)
+    all_modules = [::Rails.application] + ::Rails::Engine.subclasses.map(&:instance)
+    all_modules.map { |mod| mod.send(:_all_autoload_paths) }.flatten
+  end
 
-    dependencies.each do |path, decorator_paths|
-      decorator_paths.each do |decorator_path|
-        # If an attempt is made to load the original file, ensure the decorators are loaded afterwards.
-        if sanitized_file_name.starts_with?(path)
-          relative_name = sanitized_file_name.sub(path, '')
-          candidate_file = "#{decorator_path}#{relative_name}#{DECORATOR_PATTERN}"
+  def self.relative_search_path(file_name, const_path = nil)
+    file = file_name
 
-          if File.file?(candidate_file + '.rb')
-            decorated_file = sanitized_file_name
-            decorators << candidate_file
-          end
-        end
-
-        # If an attempt is made to load a decorator file, ensure the original/decorated file is loaded first.
-        # This is only supported when a decorator was not added with add_global.
-        if sanitized_file_name.starts_with?(decorator_path)
-          relative_name = sanitized_file_name.sub(decorator_path, '')
-          candidate_file = "#{path}#{relative_name}".sub(/#{DECORATOR_PATTERN}$/, '')
-
-          if File.file?(candidate_file + '.rb')
-            fail "File #{sanitized_file_name} is a decorator for #{candidate_file}, but this file is already
-                  decorating #{decorated_file}." unless decorated_file.nil? || decorated_file == candidate_file
-            decorated_file = candidate_file
-            decorators << sanitized_file_name
-          end
-        end
-      end
-    end
-
-    if decorated_file
-      # Decorators are sorted to ensure the load order is always the same.
-      [decorated_file] + decorators.sort
+    if const_path
+      file = const_path.underscore
     else
-      [sanitized_file_name]
+      sanitized_file_name = file_name.sub(/\.rb$/, '')
+      first_load_path_match = all_autoload_paths.find { |p| file_name.include?(p) }
+      file = sanitized_file_name.sub(first_load_path_match, '') if first_load_path_match
     end
+    "#{file}#{pattern}.rb"
+  end
+
+  def self.load_path_order(file_name, const_path = nil)
+    order = [file_name]
+
+    expanded_paths.each do |path|
+      candidate_file = File.join(path, relative_search_path(file_name, const_path))
+      order << candidate_file if File.file?(candidate_file)
+    end
+
+    order
   end
 end
