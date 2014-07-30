@@ -19,19 +19,26 @@ describe ActiveSupportDecorators do
       ActiveSupportDecorators.paths << File.join(File.dirname(__FILE__), 'support', 'decorators')
     end
 
-    it 'it loads the decorator file after loading the original without const_path' do
+    it 'it loads the decorator file when you load the original without const_path' do
       path = File.join(File.dirname(__FILE__), 'support', 'originals', 'pet')
       ActiveSupport::Dependencies.require_or_load(path)
 
       Pet.new.owner.should eq('Mr. Robinson')
     end
 
-    it 'it loads the decorator file after loading the original with const_path' do
+    it 'it loads the decorator file when you load the original with const_path' do
       path = File.join(File.dirname(__FILE__), 'support', 'originals', 'pet')
       ActiveSupport::Dependencies.require_or_load(path, 'Pet')
 
       Pet.new.owner.should eq('Mr. Robinson')
     end
+
+    #it 'it loads the original file when you load the decorator file' do
+    #  path = File.join(File.dirname(__FILE__), 'support', 'decorators', 'pet_decorator')
+    #  ActiveSupport::Dependencies.require_or_load(path)
+
+    #  Pet.new.owner.should eq('Mr. Robinson')
+    #end
   end
 
   describe 'when not using activesupport-decorators' do

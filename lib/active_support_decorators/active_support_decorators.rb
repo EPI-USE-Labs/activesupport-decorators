@@ -1,4 +1,5 @@
 module ActiveSupportDecorators
+
   def self.paths
     @paths ||= []
   end
@@ -23,6 +24,39 @@ module ActiveSupportDecorators
     @debug = debugging_enabled
   end
 
+  def self.log(message)
+    puts message if debug
+  end
+
+  def self.is_decorator?(file_name)
+    sanitize(file_name).ends_with?(pattern)
+  end
+
+  def self.all(file_name, const_path = nil)
+    file = sanitize(file_name)
+
+    if const_path
+      file = const_path.underscore
+    else
+      first_autoload_match = all_autoload_paths.find { |p| file.include?(p) }
+      file.sub!(first_autoload_match, '') if first_autoload_match
+    end
+
+    relative_target = "#{file}#{pattern}.rb"
+
+    expanded_paths.map { |path| File.join(path, relative_target) }.select { |candidate| File.file?(candidate) }
+  end
+
+  def self.original_const_name(file_name)
+    first_match = expanded_paths.find { |path| file_name.include?(path) }
+
+    if first_match
+      sanitize(file_name).sub("#{first_match}/", '').sub(pattern, '').camelize
+    else
+      nil
+    end
+  end
+
   private
   def self.all_autoload_paths
     return [] unless defined?(Rails)
@@ -30,27 +64,7 @@ module ActiveSupportDecorators
     all_modules.map { |mod| mod.send(:_all_autoload_paths) }.flatten
   end
 
-  def self.relative_search_path(file_name, const_path = nil)
-    file = file_name
-
-    if const_path
-      file = const_path.underscore
-    else
-      sanitized_file_name = file_name.sub(/\.rb$/, '')
-      first_load_path_match = all_autoload_paths.find { |p| file_name.include?(p) }
-      file = sanitized_file_name.sub(first_load_path_match, '') if first_load_path_match
-    end
-    "#{file}#{pattern}.rb"
-  end
-
-  def self.load_path_order(file_name, const_path = nil)
-    order = [file_name]
-
-    expanded_paths.each do |path|
-      candidate_file = File.join(path, relative_search_path(file_name, const_path))
-      order << candidate_file if File.file?(candidate_file)
-    end
-
-    order
+  def self.sanitize(file_name)
+    file_name.sub(/\.rb$/, '')
   end
 end
