@@ -22,16 +22,16 @@ gem 'activesupport-decorators', '~> 2.0'
 
 #### Example 1 - Application extends engine (or any other) class.
 
-Your Rails engine defines a model called Pet (in my_engine/app/models/pet.rb):
+Your engine defines a model called Pet (in my_engine/app/models/pet.rb):
 
 ```Ruby
 class Pet < ActiveRecord::Base
 end
 ```
 
-Your Rails application now wants to adds the concept of pet owners.  You extend the Pet model in the main application
-with the following model decorator (in app/models/pet_decorator.rb).  Note that you could use 'Pet.class_eval do'
-instead of 'class Pet' if you want.
+Your application now wants to adds the concept of pet owners.  You extend the Pet model in the application with the
+following model decorator (in app/models/pet_decorator.rb).  Note that you could use 'Pet.class_eval do' instead
+of 'class Pet' if you want.
 
 ```Ruby
 class Pet
@@ -39,9 +39,9 @@ class Pet
 end
 ```
 
-Set your ActiveSupportDecorators paths similar to setting Rails autoload paths.  This will load a decorator file if it
-matches the original file's name/path and ends with '_decorator.rb'.  In other words when the engine's app/pet.rb is
-loaded, it will load the main applications app/pet_decorator.rb.
+Now tell ActiveSupportDecorators where to look for decorators, similar to setting Rails autoload paths.  This will load
+a decorator file if it matches the original file's name/path and ends with '_decorator.rb'.  In other words when the
+engine's app/pet.rb is loaded, it will load the main applications app/pet_decorator.rb.
 
 ```Ruby
 ActiveSupportDecorators.paths << File.join(Rails.application.root, 'app/**')
