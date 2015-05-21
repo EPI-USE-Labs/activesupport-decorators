@@ -11,7 +11,7 @@ describe ActiveSupportDecorators do
 
   describe 'when configuring a decorator path' do
     before :each do
-      ActiveSupportDecorators.stub(:all_autoload_paths) do
+      ActiveSupport::Dependencies.stub(:autoload_paths) do
         [File.join(File.dirname(__FILE__), 'support', 'originals')]
       end
 

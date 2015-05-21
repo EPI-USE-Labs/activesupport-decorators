@@ -15,7 +15,7 @@ This is a tiny gem that provides you with a simple way to tell ActiveSupport to 
 Add it to your Gemfile and run bundle install:
 
 ```Ruby
-gem 'activesupport-decorators', '~> 2.1'
+gem 'activesupport-decorators', '~> 2.0'
 ```
 
 ### Usage
