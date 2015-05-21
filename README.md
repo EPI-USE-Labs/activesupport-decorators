@@ -1,8 +1,7 @@
 ActiveSupport Decorators
 ========================
 
-[![Build Status](https://travis-ci.org/EPI-USE-Labs/activesupport-decorators.png?branch=master)]
-(https://travis-ci.org/EPI-USE-Labs/activesupport-decorators)
+[![Build Status](https://travis-ci.org/EPI-USE-Labs/activesupport-decorators.svg?branch=master)](https://travis-ci.org/EPI-USE-Labs/activesupport-decorators)
 
 The decorator pattern is particularly useful when extending constants in rails engines or vice versa.  To implement
 the decorator pattern, you need to load the decorator after the original file has been loaded.  When you reference a
@@ -15,7 +14,7 @@ This is a tiny gem that provides you with a simple way to tell ActiveSupport to 
 Add it to your Gemfile and run bundle install:
 
 ```Ruby
-gem 'activesupport-decorators', '~> 2.0'
+gem 'activesupport-decorators', '~> 2.1'
 ```
 
 ### Usage
