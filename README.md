@@ -15,7 +15,7 @@ This is a tiny gem that provides you with a simple way to tell ActiveSupport to 
 Add it to your Gemfile and run bundle install:
 
 ```Ruby
-gem 'activesupport-decorators', '~> 2.0'
+gem 'activesupport-decorators', '~> 2.1'
 ```
 
 ### Usage
@@ -68,12 +68,26 @@ module MyEngine
 end
 ```
 
-### Debugging
+### Troubleshooting
 
-Need to know which decorator files are loaded?  Enable debug output:
+1) Enable debug output to see which decorators are loaded:
 
 ```Ruby
 ActiveSupportDecorators.debug = true
+```
+
+2) There is a standard ActiveSupport method available to see all load paths configured in your application.  The file you
+are trying to decorate should be on one of these:
+
+```Ruby
+ActiveSupport::Dependencies.autoload_paths
+```
+
+3) The relative path of the file you are trying to decorate in (2) should match the relative path of your decorator file
+to your configured decorator paths:
+
+```Ruby
+ActiveSupportDecorators.expanded_paths
 ```
 
 ### Comparison to other gems

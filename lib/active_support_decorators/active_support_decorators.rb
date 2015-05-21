@@ -38,7 +38,7 @@ module ActiveSupportDecorators
     if const_path
       file = const_path.underscore
     else
-      first_autoload_match = all_autoload_paths.find { |p| file.include?(p) }
+      first_autoload_match = ActiveSupport::Dependencies.autoload_paths.find { |p| file.include?(p) }
       file.sub!(first_autoload_match, '') if first_autoload_match
     end
 
@@ -58,12 +58,6 @@ module ActiveSupportDecorators
   end
 
   private
-  def self.all_autoload_paths
-    return [] unless defined?(Rails)
-    all_modules = [::Rails.application] + ::Rails::Engine.subclasses.map(&:instance)
-    all_modules.map { |mod| mod.send(:_all_autoload_paths) }.flatten
-  end
-
   def self.sanitize(file_name)
     file_name.sub(/\.rb$/, '')
   end
