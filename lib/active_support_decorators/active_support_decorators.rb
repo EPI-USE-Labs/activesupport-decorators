@@ -38,7 +38,7 @@ module ActiveSupportDecorators
     if const_path
       file = const_path.underscore
     else
-      first_autoload_match = ActiveSupport::Dependencies.autoload_paths.find { |p| file.include?(p) }
+      first_autoload_match = ActiveSupport::Dependencies.autoload_paths.find { |p| file.include?(p.to_s) }
       file.sub!(first_autoload_match, '') if first_autoload_match
     end
 
