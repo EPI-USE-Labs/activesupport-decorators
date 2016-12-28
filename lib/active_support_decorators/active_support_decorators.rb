@@ -32,6 +32,8 @@ module ActiveSupportDecorators
     sanitize(file_name).ends_with?(pattern)
   end
 
+  # Line:44 'first_autoload_match' needs to be converted to string because in some scenarios(eg. while loading concerns) the autoload
+  # path is returned as a Pathname object and not as a plain string.
   def self.all(file_name, const_path = nil)
     file = sanitize(file_name)
 
@@ -39,7 +41,7 @@ module ActiveSupportDecorators
       file = const_path.underscore
     else
       first_autoload_match = ActiveSupport::Dependencies.autoload_paths.find { |p| file.include?(p.to_s) }
-      file.sub!(first_autoload_match, '') if first_autoload_match
+      file.sub!(first_autoload_match.to_s, '') if first_autoload_match
     end
 
     relative_target = "#{file}#{pattern}.rb"
